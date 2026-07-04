@@ -224,8 +224,12 @@ export default function Home() {
     setErrorMsg('');
     setIsCheckingPayment(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/scan/${sessionId}/unlock-free`, {
+      const res = await fetch(`${API_BASE}/api/v1/webhooks/lemonsqueezy/simulate`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ session_id: sessionId }),
       });
       
       if (!res.ok) {
