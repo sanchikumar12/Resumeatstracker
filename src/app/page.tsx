@@ -219,24 +219,24 @@ export default function Home() {
     }
   };
 
-  // Checkout redirect handling (US-4 AC1)
+  // Checkout redirect handling (US-4 AC1) - Now free!
   const handleCheckout = async () => {
     setErrorMsg('');
+    setIsCheckingPayment(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/scan/${sessionId}/checkout`, {
+      const res = await fetch(`${API_BASE}/api/v1/scan/${sessionId}/unlock-free`, {
         method: 'POST',
       });
       
       if (!res.ok) {
-        throw new Error('Checkout generation failed.');
+        throw new Error('Unlock generation failed.');
       }
       
-      const data = await res.json();
-      
-      // Redirect to the Checkout Simulator page locally
-      window.location.href = data.checkout_url;
+      await fetchUnlockedReport(sessionId);
     } catch (err) {
-      setErrorMsg('Failed to initiate checkout. Please try again.');
+      setErrorMsg('Failed to unlock the report. Please try again.');
+    } finally {
+      setIsCheckingPayment(false);
     }
   };
 
@@ -476,8 +476,9 @@ export default function Home() {
                     <span className="score-badge medium">Exclusive Report Unlock</span>
                     <div className="price-display">
                       <span className="price-original">$14.99</span>
-                      <span className="price-amount">{abPrice}</span>
-                      <span className="price-currency">USD</span>
+                      <span className="price-original">{abPrice}</span>
+                      <span className="price-amount" style={{ color: 'var(--color-success)' }}>Free</span>
+                      <span className="price-currency" style={{ color: 'var(--color-success)' }}>USD</span>
                     </div>
                     <h3 style={{ marginBottom: '1rem' }}>Get the detailed fix checklist</h3>
                     <ul className="pricing-features">
@@ -499,8 +500,13 @@ export default function Home() {
                       </li>
                     </ul>
                     
-                    <button className="btn btn-primary" style={{ width: '100%' }} onClick={handleCheckout}>
-                      Unlock Detailed Audit Report
+                    <button 
+                      className="btn btn-primary" 
+                      style={{ width: '100%' }} 
+                      onClick={handleCheckout}
+                      disabled={isCheckingPayment}
+                    >
+                      {isCheckingPayment ? 'Unlocking...' : 'Unlock Detailed Audit Report'}
                     </button>
                     <p style={{ fontSize: '0.75rem', marginTop: '0.75rem', color: 'var(--color-text-muted)' }}>
                       Secure Checkout with LemonSqueezy. VAT/tax calculated at checkout.
